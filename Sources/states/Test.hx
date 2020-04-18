@@ -51,6 +51,7 @@ class Test extends State {
 
 		atlas.add(new TilesheetLoader("tiles", 6, 5, 0));
 		atlas.add(new ImageLoader("player"));
+		atlas.add(new ImageLoader("wood"));
 		resources.add(atlas);
 	}
 
@@ -187,6 +188,11 @@ class Test extends State {
 		CollisionEngine.collide(chivito.collision, worldMap.collision);
 		
 		stage.defaultCamera().setTarget(chivito.display.x, chivito.display.y);
+		#if DEBUGDRAW
+		if(Input.i.isKeyCodeReleased(KeyCode.F9)){
+			debugDraw = !debugDraw;
+		}
+		#end
 	}
 
 	
@@ -196,4 +202,16 @@ class Test extends State {
 		super.destroy();
 
 	}
+
+	#if DEBUGDRAW
+	var debugDraw:Bool=true;
+	override function draw(framebuffer:kha.Canvas) {
+		super.draw(framebuffer);
+		
+		if(debugDraw){
+			var camera=stage.defaultCamera();
+			CollisionEngine.renderDebug(framebuffer,camera);
+		}
+	}
+	#end
 }

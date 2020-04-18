@@ -5,7 +5,7 @@ import com.gEngine.display.Layer;
 
 
 class GameGlobals {
-    public static inline var Gravity:Float=1000;
+    public static inline var Gravity:Float=600;
     public static var simulationLayer:Layer;
 
    public static function clear() {
