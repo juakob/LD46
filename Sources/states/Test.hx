@@ -1,5 +1,6 @@
 package states;
 
+import com.loading.basicResources.SpriteSheetLoader;
 import com.gEngine.display.Sprite;
 import com.soundLib.SoundManager.SM;
 import com.loading.basicResources.SoundLoader;
@@ -60,7 +61,8 @@ class Test extends State {
 		var atlas = new JoinAtlas(2048, 2048);
 
 		atlas.add(new TilesheetLoader("tiles", 6, 5, 0));
-		atlas.add(new ImageLoader("player"));
+		atlas.add(new SpriteSheetLoader("player",11,11,0,[new Sequence("idle",[0]),new Sequence("armsUp",[1])]));
+		atlas.add(new SpriteSheetLoader("fire",10,10,0,[new Sequence("idle",[0,1,2])]));
 		atlas.add(new ImageLoader("wood"));
 		atlas.add(new ImageLoader("direction"));
 		atlas.add(new ImageLoader("firePlace"));
@@ -75,7 +77,7 @@ class Test extends State {
 	override function init() {
 		SM.playMusic("fight");
 		pickables=new CollisionGroup();
-		stageColor(0.5, .5, 0.5);
+		stageColor(0, 0, 0);
 		simulationLayer = new Layer();
 		var backgroundLayer = new Layer();
 		simulationLayer.addChild(backgroundLayer);
@@ -188,8 +190,13 @@ class Test extends State {
 
 		stage.defaultCamera().setTarget(player.display.x, player.display.y);
 		#if DEBUGDRAW
-		if(Input.i.isKeyCodeReleased(KeyCode.F9)){
+		if(Input.i.isKeyCodePressed(KeyCode.F9)){
 			debugDraw = !debugDraw;
+		}
+		#end
+		#if debug
+		if(Input.i.isKeyCodePressed(KeyCode.N)){
+			advanceLevel();
 		}
 		#end
 	}
@@ -201,7 +208,10 @@ class Test extends State {
 		
 	}
 	public function woodVsFirePlace(woodC:ICollider,playerC:ICollider) {
-		++GameGlobals.currentLevel;
+		advanceLevel();
+	}
+	function advanceLevel() {
+		GameGlobals.currentLevel = ++GameGlobals.currentLevel%(GameGlobals.totalLevels+1);
 		changeState(new Test());
 	}
 	public function playerVsDamage(playerC:ICollider,damage:ICollider) {

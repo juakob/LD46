@@ -1,7 +1,7 @@
 let project = new Project('LD46');
 
-project.addDefine('debugInfo');
-project.addDefine('DEBUGDRAW');
+//project.addDefine('debugInfo');
+//project.addDefine('DEBUGDRAW');
 
 project.addAssets('Assets/**');
 project.addShaders('Shaders/**');

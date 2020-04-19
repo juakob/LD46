@@ -14,6 +14,7 @@ import com.framework.utils.Entity;
 class Player extends Entity {
 	public var display:Layer;
 	public var collision:CollisionBox;
+	var body:Sprite;
 
 	var directionDisplay:Sprite;
 
@@ -33,13 +34,13 @@ class Player extends Entity {
 
 	public function new(layer:Layer) {
 		super();
-		throwDirection = new FastVector2(0, 1);
+		throwDirection = new FastVector2(0, 0);
 		display = new Layer();
-		var sprite = new Sprite("player");
-		display.addChild(sprite);
-		sprite.smooth = false;
-		display.pivotX = sprite.width() * 0.5;
-		display.pivotY = sprite.height();
+		body = new Sprite("player");
+		display.addChild(body);
+		body.smooth = false;
+		display.pivotX = body.width() * 0.5;
+		display.pivotY = body.height();
 		layer.addChild(display);
 
 		directionDisplay = new Sprite("direction");
@@ -49,8 +50,8 @@ class Player extends Entity {
 		layer.addChild(directionDisplay);
 
 		collision = new CollisionBox();
-		collision.width = sprite.width();
-		collision.height = sprite.height();
+		collision.width = body.width();
+		collision.height = body.height();
 		collision.maxVelocityX = 500;
 		// display.offsetX = -display.width()*0.5;
 		// display.offsetY = -display.height()*0.5;
@@ -107,12 +108,18 @@ class Player extends Entity {
 
 	override function render() {
 		super.render();
+		if(pickObject!=null){
+			body.timeline.playAnimation("armsUp");
+		}else{
+			body.timeline.playAnimation("idle");
+		}
 		if (throwMode&&pickObject!=null) {
 			directionDisplay.visible = true;
 			directionDisplay.x = collision.x+collision.width*0.5;
 			directionDisplay.y = collision.y+collision.height*0.5;
-			adjustEmptyDirection();
-			directionDisplay.rotation = Math.atan2(throwDirection.y, throwDirection.x);
+			var direction=new FastVector2(throwDirection.x,throwDirection.y);
+			adjustEmptyDirection(direction);
+			directionDisplay.rotation = Math.atan2(direction.y, direction.x);
 		} else {
 			directionDisplay.visible = false;
 		}
@@ -216,14 +223,15 @@ class Player extends Entity {
 				throwMode = false;
 
 				if (pickObject != null) {
-					adjustEmptyDirection();
-					throwDirection.setFrom(throwDirection.normalized());
+					var direction=new FastVector2(throwDirection.x,throwDirection.y);
+					adjustEmptyDirection(direction);
+					direction.setFrom(direction.normalized());
 
-					pickObject.shoot(collision.x, collision.y, throwDirection);
-					if(Math.abs(throwDirection.x)!=1){
-						collision.velocityX=collision.maxVelocityX*throwDirection.x;
-						collision.velocityY=collision.maxVelocityY*-throwDirection.y;
-						collision.accelerationX=collision.maxVelocityX*throwDirection.x;
+					pickObject.shoot(collision.x, collision.y, direction);
+					if(Math.abs(direction.x)!=1){
+						collision.velocityX=collision.maxVelocityX*direction.x;
+						collision.velocityY=collision.maxVelocityY*-direction.y;
+						collision.accelerationX=collision.maxVelocityX*direction.x;
 					}
 					SM.playFx("throwWood");
 					pickObject = null;
@@ -252,9 +260,10 @@ class Player extends Entity {
 	}
 
 	public function onAxisChange(id:Int, value:Float) {}
-	function adjustEmptyDirection() {
-		if (throwDirection.x == 0 && throwDirection.y == 0) {
-			throwDirection.setFrom(new FastVector2(-display.scaleX, 0));
+
+	inline function adjustEmptyDirection(vector:FastVector2) {
+		if(vector.x == 0 && vector.y == 0){
+			vector.setFrom(new FastVector2(-display.scaleX, 0));
 		}
 	}
 }

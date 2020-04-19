@@ -58,7 +58,7 @@ class WoodLog extends Entity {
         display.removeFromParent();
         layer.addChild(display);
         display.x=0;
-        display.y=-3;
+        display.y=-5;
         collision.removeFromParent();
         return true;
     }
