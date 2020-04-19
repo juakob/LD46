@@ -1,5 +1,7 @@
 package states;
 
+import gameObjects.FirePlace;
+import com.collision.platformer.ICollider;
 import kha.audio1.AudioChannel;
 import com.framework.utils.XboxJoystick;
 import com.framework.utils.VirtualGamepad;
@@ -21,10 +23,11 @@ import com.loading.basicResources.JoinAtlas;
 import com.loading.Resources;
 import com.framework.utils.State;
 import gameObjects.GameGlobals;
+import gameObjects.WoodLog;
 
 class Test extends State {
 	var worldMap:Tilemap;
-	var chivito:Player;
+	var player:Player;
 	var enemiesCollisions:CollisionGroup;
 	var rainCollisions:CollisionGroup;
 	var doors:CollisionGroup;
@@ -38,6 +41,9 @@ class Test extends State {
 	var fromRoom:String;
 	var touchJoystick:VirtualGamepad;
 	var rainSound:AudioChannel;
+	var pickables:CollisionGroup;
+
+	var wood:WoodLog;
 
 	public function new(room:String="", fromRoom:String = null) {
 		super();
@@ -52,10 +58,13 @@ class Test extends State {
 		atlas.add(new TilesheetLoader("tiles", 6, 5, 0));
 		atlas.add(new ImageLoader("player"));
 		atlas.add(new ImageLoader("wood"));
+		atlas.add(new ImageLoader("direction"));
+		atlas.add(new ImageLoader("firePlace"));
 		resources.add(atlas);
 	}
 
 	override function init() {
+		pickables=new CollisionGroup();
 		stageColor(0.5, .5, 0.5);
 		simulationLayer = new Layer();
 		var backgroundLayer = new Layer();
@@ -78,15 +87,14 @@ class Test extends State {
 			simulationLayer.addChild(layerTilemap.createDisplay(tileLayer));
 		}, parseMapObjects);
 		stage.defaultCamera().limits(0, 0, worldMap.widthIntTiles * 6 , worldMap.heightInTiles * 5);
-		stage.defaultCamera().scale=4;
+		stage.defaultCamera().scale=5;
 		//for (i in 0...totalTiles) {
 		//	mayonnaiseMap.setTile2(i, 1);
 		//}
 		
-		chivito = new Player(simulationLayer);
-		chivito.collision.x = 10;
-		chivito.collision.y = 10;
-		addChild(chivito);
+		
+
+		
 
 		createTouchJoystick();
 	}
@@ -98,16 +106,35 @@ class Test extends State {
 		touchJoystick.addKeyButton(XboxJoystick.LEFT_DPAD, KeyCode.Left);
 		touchJoystick.addKeyButton(XboxJoystick.RIGHT_DPAD, KeyCode.Right);
 		touchJoystick.addKeyButton(XboxJoystick.UP_DPAD, KeyCode.Up);
+		touchJoystick.addKeyButton(XboxJoystick.DOWN_DPAD, KeyCode.Down);
 		touchJoystick.addKeyButton(XboxJoystick.A, KeyCode.Space);
 		touchJoystick.addKeyButton(XboxJoystick.X, KeyCode.X);
-		touchJoystick.notify(chivito.onAxisChange, chivito.onButtonChange);
+		touchJoystick.notify(player.onAxisChange, player.onButtonChange);
 
 		var gamepad = Input.i.getGamepad(0);
-		gamepad.notify(chivito.onAxisChange, chivito.onButtonChange);
+		gamepad.notify(player.onAxisChange, player.onButtonChange);
 	}
 
-	function parseMapObjects(layerTilemap:Tilemap, object:TmxObject) {}
-
+	function parseMapObjects(layerTilemap:Tilemap, object:TmxObject) {
+		if(object.type=="firePlace"){
+			var firePlace=new FirePlace(simulationLayer,doors);
+			firePlace.collision.x = object.x;
+			firePlace.collision.y = object.y-object.height;
+			addChild(firePlace);
+		}
+		if(object.type=="playerStart"){
+			player = new Player(simulationLayer);
+			player.collision.x = object.x;
+			player.collision.y = object.y;
+			addChild(player);
+		}
+		if(object.type=="woodStart"){
+			wood=new WoodLog(simulationLayer,pickables);
+			wood.collision.x=object.x;
+			wood.collision.y=object.y;
+			addChild(wood);
+		}
+	}
 	/*function parseMapObjects(layerTilemap:Tilemap,object:TmxObject){
 		if(object.type=="enemy"){
 			var count=Std.parseInt(object.properties.get("enemyCount"));
@@ -185,9 +212,15 @@ class Test extends State {
 	override function update(dt:Float) {
 		super.update(dt);
 
-		CollisionEngine.collide(chivito.collision, worldMap.collision);
+		CollisionEngine.collide(player.collision, worldMap.collision);
+		for(pickable in pickables.colliders){
+			CollisionEngine.bulletCollide(cast pickable, worldMap.collision,10);
+		}
 		
-		stage.defaultCamera().setTarget(chivito.display.x, chivito.display.y);
+		CollisionEngine.overlap(pickables, player.collision,woodVsPlayer);
+		CollisionEngine.overlap(pickables, doors,woodVsFirePlace);
+
+		stage.defaultCamera().setTarget(player.display.x, player.display.y);
 		#if DEBUGDRAW
 		if(Input.i.isKeyCodeReleased(KeyCode.F9)){
 			debugDraw = !debugDraw;
@@ -195,7 +228,15 @@ class Test extends State {
 		#end
 	}
 
-	
+	public function woodVsPlayer(woodC:ICollider,playerC:ICollider) {
+		var wood:WoodLog=cast woodC.userData;
+		var player:Player=cast playerC.userData;
+		player.pickUp(wood);
+		
+	}
+	public function woodVsFirePlace(woodC:ICollider,playerC:ICollider) {
+		changeState(new Test());
+	}
 
 	override function destroy() {
 		this.touchJoystick.destroy();

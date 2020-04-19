@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="61" height="42" tilewidth="6" tileheight="5" infinite="0" nextlayerid="4" nextobjectid="1">
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="61" height="42" tilewidth="6" tileheight="5" infinite="0" nextlayerid="5" nextobjectid="5">
  <tileset firstgid="1" name="tiles" tilewidth="6" tileheight="5" tilecount="400" columns="20">
   <image source="tiles.png" width="120" height="100"/>
+ </tileset>
+ <tileset firstgid="401" name="asdf" tilewidth="28" tileheight="20" tilecount="1" columns="0">
+  <grid orientation="orthogonal" width="1" height="1"/>
+  <tile id="0">
+   <image width="28" height="20" source="firePlace.png"/>
+  </tile>
  </tileset>
  <layer id="3" name="Tile Layer 1" width="61" height="42">
   <data encoding="csv">
@@ -49,4 +55,9 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
+ <objectgroup id="4" name="Object Layer 1">
+  <object id="4" type="firePlace" gid="401" x="16.25" y="155.75" width="28" height="20"/>
+  <object id="2" type="playerStart" x="21.5" y="96.5"/>
+  <object id="3" type="woodStart" x="59" y="96.5"/>
+ </objectgroup>
 </map>
