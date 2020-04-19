@@ -1,5 +1,7 @@
 package states;
 
+import com.soundLib.SoundManager.SM;
+import com.loading.basicResources.SoundLoader;
 import gameObjects.FirePlace;
 import com.collision.platformer.ICollider;
 import kha.audio1.AudioChannel;
@@ -61,9 +63,11 @@ class Test extends State {
 		atlas.add(new ImageLoader("direction"));
 		atlas.add(new ImageLoader("firePlace"));
 		resources.add(atlas);
+		resources.add(new SoundLoader("fight"));
 	}
 
 	override function init() {
+		SM.playMusic("fight");
 		pickables=new CollisionGroup();
 		stageColor(0.5, .5, 0.5);
 		simulationLayer = new Layer();

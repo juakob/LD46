@@ -75,7 +75,7 @@ class Player extends Entity {
 	}
 
 	override function update(dt:Float) {
-		if (throwMode) {
+		if (throwMode&&pickObject!=null) {
 			dt *= 0.2;
 		}
 		super.update(dt);
@@ -98,10 +98,11 @@ class Player extends Entity {
 
 	override function render() {
 		super.render();
-		if (throwMode) {
+		if (throwMode&&pickObject!=null) {
 			directionDisplay.visible = true;
-			directionDisplay.x = collision.x;
-			directionDisplay.y = collision.y;
+			directionDisplay.x = collision.x+collision.width*0.5;
+			directionDisplay.y = collision.y+collision.height*0.5;
+			adjustEmptyDirection();
 			directionDisplay.rotation = Math.atan2(throwDirection.y, throwDirection.x);
 		} else {
 			directionDisplay.visible = false;
@@ -198,19 +199,22 @@ class Player extends Entity {
 		}
 		if (id == XboxJoystick.X) {
 			if (value == 1) {
-				if (pickObject != null) {
-					throwMode = true;
-				}
+				
+				throwMode = true;
+				
 			} else {
 				throwMode = false;
 
 				if (pickObject != null) {
-					if (throwDirection.x == 0 && throwDirection.y == 0) {
-						throwDirection.setFrom(new FastVector2(-display.scaleX, 0));
-					}
+					adjustEmptyDirection();
 					throwDirection.setFrom(throwDirection.normalized());
 
 					pickObject.shoot(collision.x, collision.y, throwDirection);
+					if(Math.abs(throwDirection.x)!=1){
+						collision.velocityX=collision.maxVelocityX*throwDirection.x;
+						collision.velocityY=collision.maxVelocityY*-throwDirection.y;
+						collision.accelerationX=collision.maxVelocityX*throwDirection.x;
+					}
 					pickObject = null;
 				}
 			}
@@ -235,4 +239,9 @@ class Player extends Entity {
 	}
 
 	public function onAxisChange(id:Int, value:Float) {}
+	function adjustEmptyDirection() {
+		if (throwDirection.x == 0 && throwDirection.y == 0) {
+			throwDirection.setFrom(new FastVector2(-display.scaleX, 0));
+		}
+	}
 }
