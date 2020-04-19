@@ -1,5 +1,6 @@
 package states;
 
+import com.gEngine.display.Sprite;
 import com.soundLib.SoundManager.SM;
 import com.loading.basicResources.SoundLoader;
 import gameObjects.FirePlace;
@@ -29,6 +30,7 @@ import gameObjects.WoodLog;
 
 class Test extends State {
 	var worldMap:Tilemap;
+	var damageMap:Tilemap;
 	var player:Player;
 	var enemiesCollisions:CollisionGroup;
 	var rainCollisions:CollisionGroup;
@@ -85,21 +87,27 @@ class Test extends State {
 
 		worldMap = new Tilemap("testRoom_tmx", "tiles", 1);
 		worldMap.init(function(layerTilemap, tileLayer) {
+			if (tileLayer.properties.exists("damage"))return;
 			if (!tileLayer.properties.exists("noCollision")) {
 				layerTilemap.createCollisions(tileLayer);
 			}
 			simulationLayer.addChild(layerTilemap.createDisplay(tileLayer));
 		}, parseMapObjects);
+
+
+		damageMap = new Tilemap("testRoom_tmx", "tiles", 1);
+		damageMap.init(function(layerTilemap, tileLayer) {
+			if (tileLayer.properties.exists("damage")) {
+				layerTilemap.createCollisions(tileLayer);
+				simulationLayer.addChild(layerTilemap.createDisplay(tileLayer));
+			}
+		});
+
+
+
 		stage.defaultCamera().limits(0, 0, worldMap.widthIntTiles * 6 , worldMap.heightInTiles * 5);
 		stage.defaultCamera().scale=5;
-		//for (i in 0...totalTiles) {
-		//	mayonnaiseMap.setTile2(i, 1);
-		//}
 		
-		
-
-		
-
 		createTouchJoystick();
 	}
 
@@ -138,85 +146,34 @@ class Test extends State {
 			wood.collision.y=object.y;
 			addChild(wood);
 		}
-	}
-	/*function parseMapObjects(layerTilemap:Tilemap,object:TmxObject){
-		if(object.type=="enemy"){
-			var count=Std.parseInt(object.properties.get("enemyCount"));
-			for(i in 0...count){
-				var enemy=new gameObjects.Enemy(object.x*4+Math.random()*object.width*4,object.y*4+Math.random()*object.height*4);
-				addChild(enemy);
-				simulationLayer.addChild(enemy.display);
-				enemiesCollisions.add(enemy.collision);
-			}
-		}else
-		if(object.type=="player"&&ivanka==null){
-			ivanka=new Player(object.x*4,object.y*4);
-			simulationLayer.addChild(ivanka.display);
-			addChild(ivanka);
-		}else
-		if(object.type=="door"){
-			var door=new CollisionBox();
-			door.x=object.x*4;
-			door.y=object.y*4;
-			door.width=object.width*4;
-			door.height=object.height*4;
-			door.userData=object.properties.get("goTo");
-			doors.add(door);
-			if(door.userData==fromRoom){
-				if(ivanka==null){
-					ivanka=new Player(object.x*4,object.y*4);
-					simulationLayer.addChild(ivanka.display);
-					addChild(ivanka);
-				}else{
-					ivanka.collision.x=object.x*4;
-					ivanka.collision.y=object.y*4;
-				}
-			}
-		}else
-		if(object.type=="rain"){
-			var drops:Int=Std.int(object.width*object.height*4/1000);
-
-			for(i in 0...drops){
-				var drop=new fx.Drop(object.y*4,(object.y+object.height)*4,object.x*4,(object.x+object.width)*4,800+Math.random()*200);
-				simulationLayer.addChild(drop.display);
-				addChild(drop);
-			}
-		}else
-		if(object.type=="sound"){
-			if(rainSound==null){rainSound = SM.playFx("rain",true);}
-			var rainBox=new CollisionBox();
-			rainBox.x=object.x*4;
-			rainBox.y=object.y*4;
-			rainBox.width=object.width*4;
-			rainBox.height=object.height*4;
-			rainCollisions.add(rainBox);
-		}else
 		if(object.type=="asset"){
-			 var display=new BasicSprite(object.properties.get("asset"));
-			 display.scaleX=(object.width/display.width())*4;
-			 display.scaleY=(object.height/display.height())*4;
-			 display.offsetY=-display.height();// origin at the bottom?
-			 display.x=object.x*4;
-			 display.y=object.y*4;
-			 display.rotation=object.rotation*Math.PI/180;
-			 simulationLayer.addChild(display);
-			 if(object.properties.exists("blend")){
-				if(object.properties.get("blend")=="add"){
-					display.blend=com.gEngine.display.BlendMode.Add;
-				}
-			 }
-			 if(object.properties.exists("multiply")){
-				 var color:kha.Color=kha.Color.fromString(object.properties.get("multiply"));
-				 display.colorMultiplication(color.R,color.G,color.B,color.A);
-			 }
-			 display.smooth=!(object.properties.exists("smooth")&&object.properties.get("smooth")=="false");
-		}
-	}*/
+			var display=new Sprite(object.properties.get("asset"));
+			display.scaleX=(object.width/display.width())*4;
+			display.scaleY=(object.height/display.height())*4;
+			display.offsetY=-display.height();// origin at the bottom?
+			display.x=object.x*4;
+			display.y=object.y*4;
+			display.rotation=object.rotation*Math.PI/180;
+			simulationLayer.addChild(display);
+			if(object.properties.exists("blend")){
+			   if(object.properties.get("blend")=="add"){
+				   display.blend=com.gEngine.display.BlendMode.Add;
+			   }
+			}
+			if(object.properties.exists("multiply")){
+				var color:kha.Color=kha.Color.fromString(object.properties.get("multiply"));
+				display.colorMultiplication(color.R,color.G,color.B,color.A);
+			}
+			display.smooth=!(object.properties.exists("smooth")&&object.properties.get("smooth")=="false");
+	   }
+	}
+	
 
 	override function update(dt:Float) {
 		super.update(dt);
 
 		CollisionEngine.collide(player.collision, worldMap.collision);
+		CollisionEngine.overlap(player.collision, damageMap.collision,playerVsDamage);
 		for(pickable in pickables.colliders){
 			CollisionEngine.bulletCollide(cast pickable, worldMap.collision,10);
 		}
@@ -239,6 +196,9 @@ class Test extends State {
 		
 	}
 	public function woodVsFirePlace(woodC:ICollider,playerC:ICollider) {
+		changeState(new Test());
+	}
+	public function playerVsDamage(playerC:ICollider,damage:ICollider) {
 		changeState(new Test());
 	}
 
