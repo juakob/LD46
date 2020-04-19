@@ -1,5 +1,6 @@
 package gameObjects;
 
+import com.soundLib.SoundManager.SM;
 import kha.math.FastVector2;
 import com.collision.platformer.CollisionGroup;
 import com.collision.platformer.Sides;
@@ -43,6 +44,9 @@ class WoodLog extends Entity {
             collision.dragX=0.95;
             collision.accelerationY=GameGlobals.Gravity;
             canBePick=true;
+            if(Math.abs(collision.velocityX)>50||Math.abs(collision.velocityY)>50){
+                SM.playFx("woodHit");
+            }
         }
         collision.update(dt);
         
@@ -74,7 +78,7 @@ class WoodLog extends Entity {
 	override function render() {
         super.render();
         if(picked)return;
-		display.x = collision.x;
+		display.x =collision.x;
 		display.y = collision.y;
 	}
 }

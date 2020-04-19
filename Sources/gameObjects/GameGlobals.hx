@@ -7,6 +7,8 @@ import com.gEngine.display.Layer;
 class GameGlobals {
     public static inline var Gravity:Float=600;
     public static var simulationLayer:Layer;
+    public static var currentLevel:Int=1;
+    public static var totalLevels:Int=2;
 
    public static function clear() {
       simulationLayer=null;

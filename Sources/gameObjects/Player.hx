@@ -1,5 +1,6 @@
 package gameObjects;
 
+import com.soundLib.SoundManager.SM;
 import kha.math.FastVector2;
 import com.framework.utils.LERP;
 import com.TimeManager;
@@ -27,6 +28,8 @@ class Player extends Entity {
 
 	var pickObject:WoodLog;
 	var throwMode:Bool = false;
+
+	var lastWalkPos:Float=0;
 
 	public function new(layer:Layer) {
 		super();
@@ -92,8 +95,14 @@ class Player extends Entity {
 		if (preJumpStart < preJumpMaxTime && canJump()) {
 			jump();
 		}
+		if(collision.isTouching(Sides.BOTTOM)&&Math.abs(lastWalkPos-collision.x)>10){
+			lastWalkPos=collision.x;
+			SM.playFx("walk");
+		}
 		preJumpStart += dt;
 		collision.update(dt);
+
+		
 	}
 
 	override function render() {
@@ -113,7 +122,8 @@ class Player extends Entity {
 			display.rotation = 0;
 		}
 		var s = Math.abs(collision.velocityY) / collision.maxVelocityY;
-		display.scaleY = LERP.f(1, 1.2, s);
+		display.scaleY = LERP.f(1, 1.3, s);
+		if(display.scaleY>1.3)display.scaleY=1.3;
 		if (display.scaleX < 0) {
 			display.scaleX = -1 / display.scaleY;
 		} else {
@@ -215,6 +225,7 @@ class Player extends Entity {
 						collision.velocityY=collision.maxVelocityY*-throwDirection.y;
 						collision.accelerationX=collision.maxVelocityX*throwDirection.x;
 					}
+					SM.playFx("throwWood");
 					pickObject = null;
 				}
 			}
@@ -224,6 +235,7 @@ class Player extends Entity {
 	public function jump() {
 		if (collision.isTouching(Sides.BOTTOM) || (lastFloorTouch < coyoteTime && !isWallGrabing())) {
 			collision.velocityY = -600;
+			SM.playFx("jump");
 		} else if (isWallGrabing()) {
 			if (collision.isTouching(Sides.LEFT)) {
 				collision.velocityX = 200;
@@ -231,6 +243,7 @@ class Player extends Entity {
 				collision.velocityX = -200;
 			}
 			collision.velocityY = -600;
+			SM.playFx("jump");
 		}
 	}
 

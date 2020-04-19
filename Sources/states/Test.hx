@@ -51,12 +51,12 @@ class Test extends State {
 
 	public function new(room:String="", fromRoom:String = null) {
 		super();
-		this.room = "testRoom";
+		this.room = "level"+GameGlobals.currentLevel;
 		this.fromRoom = fromRoom;
 	}
 
 	override function load(resources:Resources) {
-		resources.add(new DataLoader("testRoom_tmx"));
+		resources.add(new DataLoader(room+"_tmx"));
 		var atlas = new JoinAtlas(2048, 2048);
 
 		atlas.add(new TilesheetLoader("tiles", 6, 5, 0));
@@ -66,6 +66,10 @@ class Test extends State {
 		atlas.add(new ImageLoader("firePlace"));
 		resources.add(atlas);
 		resources.add(new SoundLoader("fight"));
+		resources.add(new SoundLoader("walk"));
+		resources.add(new SoundLoader("woodHit"));
+		resources.add(new SoundLoader("jump"));
+		resources.add(new SoundLoader("throwWood"));
 	}
 
 	override function init() {
@@ -85,7 +89,7 @@ class Test extends State {
 		doors = new CollisionGroup();
 		rainCollisions = new CollisionGroup();
 
-		worldMap = new Tilemap("testRoom_tmx", "tiles", 1);
+		worldMap = new Tilemap(room+"_tmx", "tiles", 1);
 		worldMap.init(function(layerTilemap, tileLayer) {
 			if (tileLayer.properties.exists("damage"))return;
 			if (!tileLayer.properties.exists("noCollision")) {
@@ -95,7 +99,7 @@ class Test extends State {
 		}, parseMapObjects);
 
 
-		damageMap = new Tilemap("testRoom_tmx", "tiles", 1);
+		damageMap = new Tilemap(room+"_tmx", "tiles", 1);
 		damageMap.init(function(layerTilemap, tileLayer) {
 			if (tileLayer.properties.exists("damage")) {
 				layerTilemap.createCollisions(tileLayer);
@@ -107,6 +111,7 @@ class Test extends State {
 
 		stage.defaultCamera().limits(0, 0, worldMap.widthIntTiles * 6 , worldMap.heightInTiles * 5);
 		stage.defaultCamera().scale=5;
+		stage.defaultCamera().pixelSnap=true;
 		
 		createTouchJoystick();
 	}
@@ -196,6 +201,7 @@ class Test extends State {
 		
 	}
 	public function woodVsFirePlace(woodC:ICollider,playerC:ICollider) {
+		++GameGlobals.currentLevel;
 		changeState(new Test());
 	}
 	public function playerVsDamage(playerC:ICollider,damage:ICollider) {
