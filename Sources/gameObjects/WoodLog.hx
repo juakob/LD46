@@ -32,7 +32,7 @@ class WoodLog extends Entity {
         collision.bounce=0.8;
         collision.userData = this;
         collision.maxVelocityY = 300;
-		collision.maxVelocityX = 160;
+		collision.maxVelocityX = 170;
         collision.dragX = 0.95;
         collisions.add(collision);
 	}
@@ -67,7 +67,7 @@ class WoodLog extends Entity {
         reAddDelay=0.1;
         canBePick=false;
         picked=false;
-        collision.x=x;
+        collision.x=x-dir.x*collision.width*0.5;
         collision.y=y;
         collision.velocityX=dir.x*500;
         collision.velocityY=dir.y*500;

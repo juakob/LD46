@@ -55,7 +55,7 @@ class Player extends Entity {
 		directionDisplay = new Sprite("direction");
 		directionDisplay.smooth = false;
 		directionDisplay.visible = false;
-		directionDisplay.offsetY = directionDisplay.height() * 0.5;
+		directionDisplay.pivotY = directionDisplay.height() * 0.5;
 		layer.addChild(directionDisplay);
 
 		collision = new CollisionBox();
@@ -133,7 +133,7 @@ class Player extends Entity {
 		if (throwMode&&pickObject!=null) {
 			directionDisplay.visible = true;
 			directionDisplay.x = collision.x+collision.width*0.5;
-			directionDisplay.y = collision.y+collision.height*0.5;
+			directionDisplay.y = collision.y;
 			var direction=new FastVector2(throwDirection.x,throwDirection.y);
 			adjustEmptyDirection(direction);
 			directionDisplay.rotation = Math.atan2(direction.y, direction.x);
