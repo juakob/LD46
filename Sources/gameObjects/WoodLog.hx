@@ -44,6 +44,7 @@ class WoodLog extends Entity {
             collision.dragX=0.95;
             collision.accelerationY=GameGlobals.Gravity;
             canBePick=true;
+        
             if(Math.abs(collision.velocityX)>50||Math.abs(collision.velocityY)>50){
                 SM.playFx("woodHit");
             }
@@ -64,6 +65,7 @@ class WoodLog extends Entity {
     }
     public function shoot(x:Float,y:Float,dir:FastVector2) {
         reAddDelay=0.1;
+        canBePick=false;
         picked=false;
         collision.x=x;
         collision.y=y;
