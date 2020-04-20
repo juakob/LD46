@@ -16,6 +16,8 @@ class Player extends Entity {
 	public var collision:CollisionBox;
 	var body:Sprite;
 
+	var bed:Sprite;
+
 	var directionDisplay:Sprite;
 
 	var maxSpeed = 100;
@@ -32,10 +34,17 @@ class Player extends Entity {
 
 	var lastWalkPos:Float=0;
 
-	public function new(layer:Layer) {
+	public function new(layer:Layer,bed:Bool=false) {
 		super();
 		throwDirection = new FastVector2(0, 0);
 		display = new Layer();
+		if(bed){
+			display.visible=false;
+			this.bed=new Sprite("bed");
+			this.bed.smooth=false;
+			this.bed.timeline.stop();
+			layer.addChild(this.bed);
+		}
 		body = new Sprite("player");
 		display.addChild(body);
 		body.smooth = false;
@@ -79,12 +88,14 @@ class Player extends Entity {
 	}
 
 	override function update(dt:Float) {
+		if(bed!=null){
+			return;
+		}
 		if (throwMode&&pickObject!=null) {
 			dt *= 0.2;
 		}
 		super.update(dt);
-		display.x = collision.x;
-		display.y = collision.y;
+		
 		var s = Math.abs(collision.velocityX / collision.maxVelocityX);
 		// display.timeline.frameRate = (1 / 24) * s + (1 - s) * (1 / 10);
 		if (collision.isTouching(Sides.BOTTOM)) {
@@ -107,6 +118,12 @@ class Player extends Entity {
 	}
 
 	override function render() {
+		if(bed!=null){
+			bed.x=collision.x;
+			bed.y=collision.y;
+		}
+		display.x = collision.x;
+		display.y = collision.y;
 		super.render();
 		if(pickObject!=null){
 			body.timeline.playAnimation("armsUp");
@@ -207,6 +224,11 @@ class Player extends Entity {
 		}
 		if (id == XboxJoystick.A) {
 			if (value == 1) {
+				if(bed!=null){
+					bed.timeline.playAnimation("out");
+					display.visible=true;
+					bed=null;
+				}
 				if (canJump()) {
 					jump();
 				} else {

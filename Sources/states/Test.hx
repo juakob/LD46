@@ -50,6 +50,8 @@ class Test extends State {
 
 	var wood:WoodLog;
 
+	var changeLevelTimer:Float=0;
+
 	public function new(room:String="", fromRoom:String = null) {
 		super();
 		this.room = "level"+GameGlobals.currentLevel;
@@ -63,6 +65,7 @@ class Test extends State {
 		atlas.add(new TilesheetLoader("tiles", 6, 5, 0));
 		atlas.add(new SpriteSheetLoader("player",11,11,0,[new Sequence("idle",[0]),new Sequence("armsUp",[1])]));
 		atlas.add(new SpriteSheetLoader("fire",10,10,0,[new Sequence("idle",[0,1,2])]));
+		atlas.add(new SpriteSheetLoader("bed",16,6,0,[new Sequence("sleep",[0]),new Sequence("out",[1])]));
 		atlas.add(new ImageLoader("wood"));
 		atlas.add(new ImageLoader("direction"));
 		atlas.add(new ImageLoader("firePlace"));
@@ -141,8 +144,21 @@ class Test extends State {
 			firePlace.collision.y = object.y-object.height;
 			addChild(firePlace);
 		}
+		if(object.type=="firePlaceOn"){
+			var firePlace=new FirePlace(simulationLayer,doors);
+			firePlace.collision.x = object.x;
+			firePlace.collision.y = object.y-object.height;
+			firePlace.start();
+			addChild(firePlace);
+		}
 		if(object.type=="playerStart"){
 			player = new Player(simulationLayer);
+			player.collision.x = object.x;
+			player.collision.y = object.y;
+			addChild(player);
+		}
+		if(object.type=="bed"){
+			player = new Player(simulationLayer,true);
 			player.collision.x = object.x;
 			player.collision.y = object.y;
 			addChild(player);
@@ -177,6 +193,13 @@ class Test extends State {
 	
 
 	override function update(dt:Float) {
+
+		if(changeLevelTimer>0){
+			changeLevelTimer-=dt;
+			if(changeLevelTimer<=0){
+				advanceLevel();
+			}
+		}
 		super.update(dt);
 
 		CollisionEngine.collide(player.collision, worldMap.collision);
@@ -207,8 +230,12 @@ class Test extends State {
 		player.pickUp(wood);
 		
 	}
-	public function woodVsFirePlace(woodC:ICollider,playerC:ICollider) {
-		advanceLevel();
+	public function woodVsFirePlace(woodC:ICollider,fireC:ICollider) {
+		var wood:WoodLog=cast woodC.userData;
+		var firePlace:FirePlace=cast fireC.userData;
+		wood.die();
+		firePlace.start();
+		changeLevelTimer=1;
 	}
 	function advanceLevel() {
 		GameGlobals.currentLevel = ++GameGlobals.currentLevel%(GameGlobals.totalLevels+1);
