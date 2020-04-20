@@ -1,5 +1,8 @@
 package states;
 
+import com.gEngine.shaders.ShRgbSplit;
+import com.gEngine.display.Blend;
+import com.gEngine.shaders.ShRetro;
 import com.loading.basicResources.SpriteSheetLoader;
 import com.gEngine.display.Sprite;
 import com.soundLib.SoundManager.SM;
@@ -28,6 +31,7 @@ import com.loading.Resources;
 import com.framework.utils.State;
 import gameObjects.GameGlobals;
 import gameObjects.WoodLog;
+import gameObjects.Snow;
 
 class Test extends State {
 	var worldMap:Tilemap;
@@ -51,6 +55,7 @@ class Test extends State {
 	var wood:WoodLog;
 
 	var changeLevelTimer:Float=0;
+	var snowLayer:Layer;
 
 	public function new(room:String="", fromRoom:String = null) {
 		super();
@@ -69,15 +74,20 @@ class Test extends State {
 		atlas.add(new ImageLoader("wood"));
 		atlas.add(new ImageLoader("direction"));
 		atlas.add(new ImageLoader("firePlace"));
+		atlas.add(new ImageLoader("pixel"));
 		resources.add(atlas);
 		resources.add(new SoundLoader("fight"));
 		resources.add(new SoundLoader("walk"));
 		resources.add(new SoundLoader("woodHit"));
 		resources.add(new SoundLoader("jump"));
 		resources.add(new SoundLoader("throwWood"));
+		resources.add(new SoundLoader("score"));
+		
 	}
 
 	override function init() {
+		snowLayer=new Layer();
+		stage.addChild(snowLayer);
 		SM.playMusic("fight");
 		pickables=new CollisionGroup();
 		stageColor(0, 0, 0);
@@ -117,6 +127,7 @@ class Test extends State {
 		stage.defaultCamera().limits(0, 0, worldMap.widthIntTiles * 6 , worldMap.heightInTiles * 5);
 		stage.defaultCamera().scale=5;
 		stage.defaultCamera().pixelSnap=true;
+		//stage.defaultCamera().postProcess=new ShRgbSplit(Blend.blendNone());
 		
 		createTouchJoystick();
 	}
@@ -138,6 +149,11 @@ class Test extends State {
 	}
 
 	function parseMapObjects(layerTilemap:Tilemap, object:TmxObject) {
+		if(object.type=="snow"){
+			for(i in 0...30){
+				addChild(new Snow(snowLayer,object.x,object.y,object.width,object.height));
+			}
+		}
 		if(object.type=="firePlace"){
 			var firePlace=new FirePlace(simulationLayer,doors);
 			firePlace.collision.x = object.x;

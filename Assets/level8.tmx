@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="111" height="32" tilewidth="6" tileheight="5" infinite="0" nextlayerid="29" nextobjectid="5">
+<map version="1.2" tiledversion="1.2.4" orientation="orthogonal" renderorder="right-down" width="111" height="32" tilewidth="6" tileheight="5" infinite="0" nextlayerid="29" nextobjectid="8">
  <tileset firstgid="1" name="tiles" tilewidth="6" tileheight="5" tilecount="400" columns="20">
   <image source="tiles.png" width="120" height="100"/>
  </tileset>
@@ -166,5 +166,8 @@
   <object id="4" type="firePlace" gid="401" x="625.295" y="89.9773" width="28" height="20"/>
   <object id="2" type="playerStart" x="20.8712" y="110.447"/>
   <object id="3" type="woodStart" x="47.4694" y="99.8864"/>
+  <object id="5" type="snow" x="50.5454" y="7.6818" width="58.9091" height="49.6364"/>
+  <object id="6" type="snow" x="309.045" y="37.1818" width="58.9091" height="49.6364"/>
+  <object id="7" type="snow" x="561.045" y="7.1818" width="58.9091" height="49.6364"/>
  </objectgroup>
 </map>
