@@ -75,6 +75,7 @@ class Test extends State {
 		atlas.add(new ImageLoader("direction"));
 		atlas.add(new ImageLoader("firePlace"));
 		atlas.add(new ImageLoader("pixel"));
+		atlas.add(new ImageLoader("z"));
 		resources.add(atlas);
 		resources.add(new SoundLoader("fight"));
 		resources.add(new SoundLoader("walk"));
@@ -168,15 +169,11 @@ class Test extends State {
 			addChild(firePlace);
 		}
 		if(object.type=="playerStart"){
-			player = new Player(simulationLayer);
-			player.collision.x = object.x;
-			player.collision.y = object.y;
+			player = new Player(object.x,object.y,simulationLayer);
 			addChild(player);
 		}
 		if(object.type=="bed"){
-			player = new Player(simulationLayer,true);
-			player.collision.x = object.x;
-			player.collision.y = object.y;
+			player = new Player(object.x,object.y,simulationLayer,true);
 			addChild(player);
 		}
 		if(object.type=="woodStart"){

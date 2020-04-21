@@ -18,6 +18,8 @@ class Player extends Entity {
 
 	var bed:Sprite;
 
+	var zzz:Array<Z>;
+
 	var directionDisplay:Sprite;
 
 	var maxSpeed = 100;
@@ -34,16 +36,26 @@ class Player extends Entity {
 
 	var lastWalkPos:Float=0;
 
-	public function new(layer:Layer,bed:Bool=false) {
+	public function new(x:Float,y:Float,layer:Layer,bed:Bool=false) {
 		super();
 		throwDirection = new FastVector2(0, 0);
 		display = new Layer();
 		if(bed){
-			display.visible=false;
-			this.bed=new Sprite("bed");
-			this.bed.smooth=false;
+			
+			display.visible = false;
+			this.bed = new Sprite("bed");
+			this.bed.smooth = false;
 			this.bed.timeline.stop();
+			this.bed.x = x;
+			this.bed.y = y;
 			layer.addChild(this.bed);
+
+			zzz=new Array();
+			for(i in 0...3){
+				var Z=new Z(layer, x+this.bed.width(), y, i/3);
+				addChild(Z);
+				zzz.push(Z);
+			}
 		}
 		body = new Sprite("player");
 		display.addChild(body);
@@ -62,6 +74,8 @@ class Player extends Entity {
 		collision.width = body.width();
 		collision.height = body.height();
 		collision.maxVelocityX = 500;
+		collision.x=x;
+		collision.y=y;
 		// display.offsetX = -display.width()*0.5;
 		// display.offsetY = -display.height()*0.5;
 		display.scaleX = display.scaleY = 1;
@@ -88,13 +102,14 @@ class Player extends Entity {
 	}
 
 	override function update(dt:Float) {
+		super.update(dt);
 		if(bed!=null){
 			return;
 		}
 		if (throwMode&&pickObject!=null) {
 			dt *= 0.2;
 		}
-		super.update(dt);
+		
 		
 		var s = Math.abs(collision.velocityX / collision.maxVelocityX);
 		// display.timeline.frameRate = (1 / 24) * s + (1 - s) * (1 / 10);
@@ -118,10 +133,7 @@ class Player extends Entity {
 	}
 
 	override function render() {
-		if(bed!=null){
-			bed.x=collision.x;
-			bed.y=collision.y;
-		}
+		
 		display.x = collision.x;
 		display.y = collision.y;
 		super.render();
@@ -228,6 +240,9 @@ class Player extends Entity {
 					bed.timeline.playAnimation("out");
 					display.visible=true;
 					bed=null;
+					for(Z in zzz){
+						Z.die();
+					}
 				}
 				if (canJump()) {
 					jump();
